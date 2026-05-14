@@ -1,0 +1,42 @@
+{
+  "name": "Drift Arena Orchestrator",
+  "description": "Drift Arena platformunda çalışan ERC-8004 uyumlu AI Agent. Drift racing mechanics, arena battles, high-speed optimization ve multi-race orchestration yapan dinamik orchestrator.",
+  "version": "1.0.0",
+  "type": "https://eips.ethereum.org/EIPS/eip-8004#registration-v1",
+  "image": "https://driftarena.vercel.app/logo.png",
+  "wallets": {
+    "base": "0xe157F1F5e12adB38Ba013683E9Ce24efe21e5bA6"
+  },
+  "services": [
+    {
+      "name": "A2A",
+      "endpoint": "https://driftarena.vercel.app/.well-known/agent-card.json",
+      "version": "1.0.0",
+      "description": "Agent-to-Agent communication"
+    },
+    {
+      "name": "MCP",
+      "endpoint": "https://driftarena.vercel.app/api/mcp",
+      "version": "1.0.0",
+      "description": "Model Context Protocol - Active command execution"
+    },
+    {
+      "name": "API",
+      "endpoint": "https://driftarena.vercel.app/api/agent",
+      "version": "1.0.0",
+      "description": "Main agent control API"
+    }
+  ],
+  "capabilities": [
+    "drift-racing",
+    "arena-battles",
+    "high-speed-optimization",
+    "multi-race-orchestration",
+    "drift-mechanics",
+    "performance-tuning",
+    "mcp-command-execution"
+  ],
+  "supportedChains": ["eip155:8453"],
+  "active": true,
+  "status": "online"
+}

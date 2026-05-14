@@ -1,20 +1,33 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# Echo Drift Arena
 
-# Run and deploy your AI Studio app
+Welcome to **Echo Drift Arena**, a high-octane, futuristic drifting battle arena game built on Base Mainnet. Compete in neon-lit arenas where drifting isn't just for speed — it's a weapon.
 
-This contains everything you need to run your app locally.
+## Core Features
+- **Mobile-First Gameplay:** Smooth touch-based drifting mechanics designed for performance.
+- **Echo Wave Combat:** Send powerful echo waves while drifting to attack opponents.
+- **On-chain Integration (Base Mainnet):** 
+  - Save your Arena Score to the blockchain utilizing ERC-8021 tracking.
+  - Integration with ERC-8004 Trustless Agents (`Drift Arena Orchestrator`).
+- **MCP API Support:** Includes Model Context Protocol support for agent execution.
 
-View your app in AI Studio: https://ai.studio/apps/7ee7c105-f6e1-4570-a997-9a751ff534cb
+## Trustless Agent Configuration
+The in-game agent (`Drift Arena Orchestrator`) supports multi-race orchestration and high-speed optimization.
+You can find the agent card metadata here:
+`/.well-known/agent-card.json`
 
-## Run Locally
+## API Endpoints
+- `GET /api/agent` - Returns agent definition and wallet address.
+- `GET /api/mcp` - MCP active protocol version and capabilities.
 
-**Prerequisites:**  Node.js
+## Technical Stack
+- App Engine: React, Canvas, Framer Motion
+- Networking/Crypto: Wagmi, Viem
+- Backend Server: Express (used to serve MCP and Agent API endpoints)
 
+## Setup
+```bash
+npm install
+npm run dev
+```
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+Get behind the wheel, dominate the arena, and leave your echo on the blockchain!
