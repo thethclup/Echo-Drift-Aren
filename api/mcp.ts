@@ -1,16 +1,8 @@
-import express from "express";
-import path from "path";
-import { createServer as createViteServer } from "vite";
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 
-async function startServer() {
-  const app = express();
-  const PORT = 3000;
-
-  app.use(express.json());
-
-  // API Route: MCP
-  app.get("/api/mcp", (req, res) => {
-    res.json({
+export default function handler(req: VercelRequest, res: VercelResponse) {
+  if (req.method === 'GET') {
+    return res.status(200).json({
       protocol: "MCP",
       version: "1.0.0",
       name: "Drift Arena MCP Endpoint",
@@ -19,11 +11,11 @@ async function startServer() {
       capabilities: ["drift-racing", "arena-battles", "high-speed-optimization"],
       timestamp: new Date().toISOString()
     });
-  });
+  }
 
-  app.post("/api/mcp", (req, res) => {
+  if (req.method === 'POST') {
     try {
-      const body = req.body;
+      const body = req.body || {};
       const { action, command, params } = body;
 
       let result: any = {};
@@ -65,7 +57,7 @@ async function startServer() {
           };
       }
 
-      res.json({
+      return res.status(200).json({
         status: "success",
         agent: "Drift Arena Orchestrator",
         response: result,
@@ -73,47 +65,12 @@ async function startServer() {
       });
 
     } catch (error) {
-      res.status(400).json({
+      return res.status(400).json({
         status: "error",
         message: "Failed to process MCP command"
       });
     }
-  });
-
-  // API Route: Agent
-  app.get("/api/agent", (req, res) => {
-    res.json({
-      name: "Drift Arena Orchestrator",
-      status: "active",
-      wallet: "0xe157F1F5e12adB38Ba013683E9Ce24efe21e5bA6",
-      platform: "Drift Arena",
-      version: "1.0.0"
-    });
-  });
-
-  // Static Assets from public (prioritized before Vite so well-known works)
-  app.use(express.static(path.join(process.cwd(), 'public')));
-
-  // Vite middleware for development
-  if (process.env.NODE_ENV !== "production") {
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: "spa",
-    });
-    app.use(vite.middlewares);
-  } else {
-    // Production static serving
-    const distPath = path.join(process.cwd(), 'dist');
-    app.use(express.static(distPath));
-    // For Express 4
-    app.get('*', (req, res) => {
-      res.sendFile(path.join(distPath, 'index.html'));
-    });
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server running on http://0.0.0.0:${PORT}`);
-  });
+  return res.status(405).json({ message: "Method Not Allowed" });
 }
-
-startServer();
