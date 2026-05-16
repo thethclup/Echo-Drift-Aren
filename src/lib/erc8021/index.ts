@@ -4,7 +4,7 @@
  */
 
 export const ATTRIBUTION_CODE = "ECHO_DRIFT_ARENA_CLIENT";
-export const BUILDER_CODE = "YOUR_BUILDER_CODE_HERE"; // Placeholder to be replaced by the developer
+export const BUILDER_CODE = "bc_bwmmfat3";
 
 export function generateAttributionPayload(transactionData: any) {
   return {
