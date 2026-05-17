@@ -9,6 +9,44 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
       status: "active",
       description: "Active MCP server for Drift Arena Orchestrator Agent",
       capabilities: ["drift-racing", "arena-battles", "high-speed-optimization"],
+      tools: [
+        {
+          name: "execute-drift",
+          description: "Executes a drift maneuver in the arena",
+          parameters: {
+            type: "object",
+            properties: {
+              angle: { type: "number" },
+              duration: { type: "number" }
+            },
+            required: ["angle", "duration"]
+          }
+        },
+        {
+          name: "fire-echo-wave",
+          description: "Fires an echo wave during a drift to attack opponents",
+          parameters: {
+            type: "object",
+            properties: {
+              intensity: { type: "number" }
+            },
+            required: ["intensity"]
+          }
+        }
+      ],
+      prompts: [
+        {
+          name: "start-race",
+          description: "Initialize the racing arena for a new session"
+        }
+      ],
+      resources: [
+        {
+          uri: "drift-record://latest",
+          name: "Latest Drift Record",
+          description: "Most recent score and drift statistics"
+        }
+      ],
       timestamp: new Date().toISOString()
     });
   }
