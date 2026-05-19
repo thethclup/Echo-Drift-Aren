@@ -13,48 +13,10 @@ async function startServer() {
     res.json({
       protocol: "MCP",
       version: "1.0.0",
-      name: "Drift Arena MCP Endpoint",
+      name: "Drift Arena Orchestrator",
       status: "active",
       description: "Active MCP server for Drift Arena Orchestrator Agent",
       capabilities: ["drift-racing", "arena-battles", "high-speed-optimization"],
-      tools: [
-        {
-          name: "execute-drift",
-          description: "Executes a drift maneuver in the arena",
-          parameters: {
-            type: "object",
-            properties: {
-              angle: { type: "number" },
-              duration: { type: "number" }
-            },
-            required: ["angle", "duration"]
-          }
-        },
-        {
-          name: "fire-echo-wave",
-          description: "Fires an echo wave during a drift to attack opponents",
-          parameters: {
-            type: "object",
-            properties: {
-              intensity: { type: "number" }
-            },
-            required: ["intensity"]
-          }
-        }
-      ],
-      prompts: [
-        {
-          name: "start-race",
-          description: "Initialize the racing arena for a new session"
-        }
-      ],
-      resources: [
-        {
-          uri: "drift-record://latest",
-          name: "Latest Drift Record",
-          description: "Most recent score and drift statistics"
-        }
-      ],
       timestamp: new Date().toISOString()
     });
   });
@@ -62,45 +24,54 @@ async function startServer() {
   app.post("/api/mcp", (req, res) => {
     try {
       const body = req.body;
-      const { action, command, params } = body;
+      const targetAction = body.action || body.command || body.method;
+
+      if (targetAction === 'initialize') {
+        return res.json({
+          protocolVersion: "2024-11-05",
+          capabilities: { tools: {}, prompts: {}, resources: {} },
+          serverInfo: { name: "Drift Arena Orchestrator", version: "1.0.0" }
+        });
+      }
+
+      if (targetAction === 'tools/list') {
+        return res.json({
+          tools: [
+            { name: "get_race_status", description: "Get the current status of the race", inputSchema: { type: "object", properties: {}, required: [] } },
+            { name: "start_race", description: "Start a new race", inputSchema: { type: "object", properties: {}, required: [] } },
+            { name: "get_leaderboard", description: "Get the current arena leaderboard", inputSchema: { type: "object", properties: {}, required: [] } },
+            { name: "optimize_speed", description: "Optimize drifter speed settings", inputSchema: { type: "object", properties: {}, required: [] } },
+            { name: "get_track_info", description: "Get information about the current track", inputSchema: { type: "object", properties: {}, required: [] } }
+          ]
+        });
+      }
+
+      if (targetAction === 'tools/call') {
+        const { name } = body.params || {};
+        return res.json({
+          content: [{ type: "text", text: `Executed ${name} successfully.` }]
+        });
+      }
+
+      if (targetAction === 'prompts/list') {
+        return res.json({ prompts: [] });
+      }
+
+      if (targetAction === 'resources/list') {
+        return res.json({ resources: [] });
+      }
 
       let result: any = {};
-      const targetAction = action || command;
-
       switch (targetAction) {
         case "status":
         case "ping":
-          result = { 
-            status: "online", 
-            agent: "Drift Arena Orchestrator",
-            message: "Engine is running - Ready to drift!" 
-          };
+          result = { status: "online", agent: "Drift Arena Orchestrator", message: "Engine is running - Ready to drift!" };
           break;
-
-        case "execute":
-          result = {
-            success: true,
-            action: command || params,
-            executedAt: new Date().toISOString(),
-            message: "Drift maneuver executed successfully"
-          };
-          break;
-
         case "get_info":
-          result = {
-            name: "Drift Arena Orchestrator",
-            wallet: "0xe157F1F5e12adB38Ba013683E9Ce24efe21e5bA6",
-            platform: "Base",
-            version: "1.0.0"
-          };
+          result = { name: "Drift Arena Orchestrator", wallet: "0xe157F1F5e12adB38Ba013683E9Ce24efe21e5bA6", platform: "Base", version: "1.0.0" };
           break;
-
         default:
-          result = {
-            success: true,
-            message: "Command received",
-            data: body
-          };
+          result = { success: true, message: "Command received", data: body };
       }
 
       res.json({
