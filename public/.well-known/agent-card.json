@@ -28,17 +28,17 @@
     {
       "name": "A2A",
       "version": "1.0.0",
-      "endpoint": ".well-known/agent-card.json"
+      "endpoint": "https://driftarena.vercel.app/.well-known/agent-card.json"
     },
     {
       "name": "MCP",
       "version": "1.0.0",
-      "endpoint": "/api/mcp"
+      "endpoint": "https://driftarena.vercel.app/api/mcp"
     },
     {
       "name": "API",
       "version": "1.0.0",
-      "endpoint": "/api/agent"
+      "endpoint": "https://driftarena.vercel.app/api/agent"
     }
   ],
   "capabilities": [

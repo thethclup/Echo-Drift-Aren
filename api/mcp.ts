@@ -54,45 +54,68 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === 'POST') {
     try {
       const body = req.body || {};
-      const { action, command, params } = body;
+      const targetMethod = body.method || body.action || body.command;
+      const reqId = body.id || null;
+      const isJsonRpc = body.jsonrpc === '2.0' || reqId !== null;
+
+      if (targetMethod === 'initialize') {
+        return res.status(200).json({
+          jsonrpc: isJsonRpc ? "2.0" : undefined,
+          id: reqId,
+          result: {
+            protocolVersion: "2024-11-05",
+            capabilities: { tools: {}, prompts: {}, resources: {} },
+            serverInfo: { name: "Drift Arena Orchestrator", version: "1.0.0" }
+          }
+        });
+      }
+
+      if (targetMethod === 'tools/list') {
+        return res.status(200).json({
+          jsonrpc: isJsonRpc ? "2.0" : undefined,
+          id: reqId,
+          result: {
+            tools: [
+              { name: "get_race_status", description: "Get the current status of the race", inputSchema: { type: "object", properties: {}, required: [] } },
+              { name: "start_race", description: "Start a new race", inputSchema: { type: "object", properties: {}, required: [] } },
+              { name: "get_leaderboard", description: "Get the current arena leaderboard", inputSchema: { type: "object", properties: {}, required: [] } },
+              { name: "optimize_speed", description: "Optimize drifter speed settings", inputSchema: { type: "object", properties: {}, required: [] } },
+              { name: "get_track_info", description: "Get information about the current track", inputSchema: { type: "object", properties: {}, required: [] } }
+            ]
+          }
+        });
+      }
+
+      if (targetMethod === 'tools/call') {
+        const { name } = body.params || {};
+        return res.status(200).json({
+          jsonrpc: isJsonRpc ? "2.0" : undefined,
+          id: reqId,
+          result: {
+            content: [{ type: "text", text: `Executed ${name} successfully.` }]
+          }
+        });
+      }
 
       let result: any = {};
-      const targetAction = action || command;
-
-      switch (targetAction) {
+      switch (targetMethod) {
         case "status":
         case "ping":
-          result = { 
-            status: "online", 
-            agent: "Drift Arena Orchestrator",
-            message: "Engine is running - Ready to drift!" 
-          };
+          result = { status: "online", agent: "Drift Arena Orchestrator", message: "Engine is running - Ready to drift!" };
           break;
-
-        case "execute":
-          result = {
-            success: true,
-            action: command || params,
-            executedAt: new Date().toISOString(),
-            message: "Drift maneuver executed successfully"
-          };
-          break;
-
         case "get_info":
-          result = {
-            name: "Drift Arena Orchestrator",
-            wallet: "0xe157F1F5e12adB38Ba013683E9Ce24efe21e5bA6",
-            platform: "Base",
-            version: "1.0.0"
-          };
+          result = { name: "Drift Arena Orchestrator", wallet: "0xe157F1F5e12adB38Ba013683E9Ce24efe21e5bA6", platform: "Base", version: "1.0.0" };
           break;
-
         default:
-          result = {
-            success: true,
-            message: "Command received",
-            data: body
-          };
+          result = { success: true, message: "Command received", data: body };
+      }
+
+      if (isJsonRpc) {
+        return res.status(200).json({
+          jsonrpc: "2.0",
+          id: reqId,
+          result
+        });
       }
 
       return res.status(200).json({

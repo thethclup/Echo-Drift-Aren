@@ -49,38 +49,51 @@ export async function POST(req: Request) {
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     };
 
-    const targetAction = body.action || body.command || body.method;
+    const targetMethod = body.method || body.action || body.command;
+    const reqId = body.id || null;
+    const isJsonRpc = body.jsonrpc === '2.0' || reqId !== null;
 
-    if (targetAction === 'initialize') {
-      return NextResponse.json({
+    const respond = (data: any) => {
+       if (isJsonRpc) {
+          return NextResponse.json({
+             jsonrpc: "2.0",
+             id: reqId,
+             result: data
+          }, { headers });
+       }
+       return NextResponse.json(data, { headers });
+    };
+
+    if (targetMethod === 'initialize') {
+      return respond({
         protocolVersion: "2024-11-05",
         capabilities: { tools: {}, prompts: {}, resources: {} },
         serverInfo: { name: "Drift Arena Orchestrator", version: "1.0.0" }
-      }, { headers });
+      });
     }
 
-    if (targetAction === 'tools/list') {
-      return NextResponse.json({ tools: TOOLS }, { headers });
+    if (targetMethod === 'tools/list') {
+      return respond({ tools: TOOLS });
     }
 
-    if (targetAction === 'tools/call') {
+    if (targetMethod === 'tools/call') {
       const { name, arguments: args } = body.params || {};
-      return NextResponse.json({
+      return respond({
         content: [{ type: "text", text: `Executed ${name} successfully.` }]
-      }, { headers });
+      });
     }
 
-    if (targetAction === 'prompts/list') {
-      return NextResponse.json({ prompts: [] }, { headers });
+    if (targetMethod === 'prompts/list') {
+      return respond({ prompts: [] });
     }
 
-    if (targetAction === 'resources/list') {
-      return NextResponse.json({ resources: [] }, { headers });
+    if (targetMethod === 'resources/list') {
+      return respond({ resources: [] });
     }
 
     // Default MCP Command Response (Fallback)
     let result: any = {};
-    switch (targetAction) {
+    switch (targetMethod) {
       case "status":
       case "ping":
         result = { status: "online", agent: "Drift Arena Orchestrator", message: "Engine is running - Ready to drift!" };
@@ -90,6 +103,14 @@ export async function POST(req: Request) {
         break;
       default:
         result = { success: true, message: "Command received", data: body };
+    }
+
+    if (isJsonRpc) {
+       return NextResponse.json({
+          jsonrpc: "2.0",
+          id: reqId,
+          result
+       }, { headers });
     }
 
     return NextResponse.json({
