@@ -2,11 +2,12 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Arena } from './components/Arena';
 import { Web3Provider } from './lib/web3';
-import { useAccount, useConnect, useDisconnect } from 'wagmi';
+import { useAccount, useConnect, useDisconnect, useSendTransaction } from 'wagmi';
 import { generateAttributionPayload } from './lib/erc8021';
 import { createAgentDelegation } from './lib/erc8004';
 import { cn } from './lib/utils';
-import { Trophy, Play, CarFront, Zap, Hexagon } from 'lucide-react';
+import { Trophy, Play, CarFront, Zap, Hexagon, Sun } from 'lucide-react';
+import { parseEther } from 'viem';
 
 type Screen = 'title' | 'lobby' | 'garage' | 'arena' | 'postgame';
 
@@ -16,6 +17,7 @@ function GameContent() {
   const { address, isConnected } = useAccount();
   const { connectors, connect } = useConnect();
   const { disconnect } = useDisconnect();
+  const { sendTransaction } = useSendTransaction();
 
   const handleGameOver = (score: number) => {
     setLastScore(score);
@@ -28,12 +30,10 @@ function GameContent() {
          return;
      }
      
-     // Mocking ERC-8021 and ERC-8004 actions for the UI
      console.log("Submitting transaction...");
      const payload = generateAttributionPayload({ score: lastScore, user: address });
      console.log("ERC-8021 Payload:", payload);
      
-     // Example trustless agent delegation setup
      const auth = createAgentDelegation({
          agentAddress: "0xAgentPlaceholder",
          maxSpend: 0n,
@@ -42,6 +42,22 @@ function GameContent() {
      console.log("Delegation status:", auth.status);
 
      alert(`Score ${lastScore} recorded on-chain successfully via Base Mainnet!`);
+  };
+
+  const sendGMTransaction = () => {
+    if (!isConnected) return;
+    sendTransaction({
+      to: '0xc35B9997B63B1CE14f8F513f7eddD9a7ABbB33d7',
+      // Sending 0 ETH, without specific ABI data, assuming the contract just accepts tx or has a fallback
+      value: parseEther('0') 
+    }, {
+      onSuccess(hash) {
+        alert('GM Transaction sent! Hash: ' + hash);
+      },
+      onError(error) {
+        console.error('GM Transaction error:', error);
+      }
+    });
   };
 
   return (
@@ -79,9 +95,18 @@ function GameContent() {
              
              <div className="mt-12 w-full max-w-xs space-y-4 relative z-10">
                 {isConnected ? (
-                   <div className="text-[10px] uppercase tracking-[0.2em] font-bold flex items-center justify-between border-l-2 border-cyan-400 p-3 bg-white/5">
-                      <span className="text-cyan-400 truncate w-32">{address}</span>
-                      <button onClick={() => disconnect()} className="text-fuchsia-500 hover:text-fuchsia-400">Disconnect</button>
+                   <div className="flex flex-col gap-2">
+                     <div className="text-[10px] uppercase tracking-[0.2em] font-bold flex items-center justify-between border-l-2 border-cyan-400 p-3 bg-white/5">
+                        <span className="text-cyan-400 truncate w-32">{address}</span>
+                        <button onClick={() => disconnect()} className="text-fuchsia-500 hover:text-fuchsia-400">Disconnect</button>
+                     </div>
+                     <button
+                       onClick={sendGMTransaction}
+                       className="px-3 py-2 rounded-lg bg-[#E8A020]/20 hover:bg-[#E8A020]/30 border border-[#E8A020]/40 text-[#E8A020] transition-colors flex items-center justify-center gap-2 font-['Cinzel'] text-xs font-bold w-full"
+                     >
+                       <Sun className="w-4 h-4" />
+                       Say GM
+                     </button>
                    </div>
                 ) : (
                     connectors.map((connector) => (
@@ -206,11 +231,21 @@ function GameContent() {
              </div>
              
              <div className="space-y-4 w-full max-w-sm mx-auto">
+                 {isConnected && (
+                   <button
+                     onClick={sendGMTransaction}
+                     className="px-3 py-2 rounded-lg bg-[#E8A020]/20 hover:bg-[#E8A020]/30 border border-[#E8A020]/40 text-[#E8A020] transition-colors flex items-center justify-center gap-2 font-['Cinzel'] text-xs font-bold w-full mb-4"
+                   >
+                     <Sun className="w-4 h-4" />
+                     Say GM
+                   </button>
+                 )}
+
                  <button 
                     onClick={recordScoreOnChain}
                     className="w-full px-8 py-4 bg-fuchsia-600 text-white font-black uppercase text-lg tracking-widest border border-white/20 shadow-[0_0_20px_rgba(236,72,153,0.4)] hover:bg-fuchsia-500 transition-colors"
                  >
-                    Record Score On-Chain
+                    Record This Run On-Chain
                  </button>
                  
                  <button 

@@ -3,8 +3,8 @@
  * Used for routing transaction rewards or tracking origin attribution.
  */
 
-export const ATTRIBUTION_CODE = "ECHO_DRIFT_ARENA_CLIENT";
-export const BUILDER_CODE = "bc_bwmmfat3";
+export const ATTRIBUTION_CODE = "[ATTRIBUTION_CODE]";
+export const BUILDER_CODE = "[BUILDER_CODE]";
 
 export function generateAttributionPayload(transactionData: any) {
   return {
